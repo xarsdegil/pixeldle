@@ -1,4 +1,4 @@
-const word = "HELLO";
+const word = "ABCYN";
 let remainingGuesses = 5;
 
 const wordleContainer = document.getElementById("wordle-container");
@@ -6,13 +6,35 @@ const remainingGuessesElement = document.getElementById("remainingGuesses");
 
 function getLetterPixels(letter) {
     const letters = {
-        H: [0x00, 0x24, 0x24, 0x3C, 0x24, 0x24, 0x24, 0x00], // H'nin piksel temsilci dizisi
-        E: [0x00, 0x3C, 0x20, 0x38, 0x20, 0x20, 0x3C, 0x00], // E'nin piksel temsilci dizisi
-        L: [0x00, 0xFF, 0x81, 0x81, 0x81, 0x81, 0x81, 0x00], // L'nin piksel temsilci dizisi
-        O: [0x00, 0x7E, 0x81, 0x81, 0x81, 0x81, 0x7E, 0x00]  // O'nun piksel temsilci dizisi
+        A: [0x3C, 0x42, 0x42, 0x42, 0x7E, 0x42, 0x42, 0x42], // A'nın piksel temsilci dizisi
+        B: [0x7C, 0x42, 0x42, 0x7C, 0x42, 0x42, 0x42, 0x7C], // B'nin piksel temsilci dizisi
+        C: [0x1C, 0x22, 0x40, 0x40, 0x40, 0x40, 0x22, 0x1C], // C'nin piksel temsilci dizisi
+        D: [0x7C, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x7C], // D'nin piksel temsilci dizisi
+        E: [0x7E, 0x40, 0x40, 0x78, 0x40, 0x40, 0x40, 0x7E], // E'nin piksel temsilci dizisi
+        F: [0x7E, 0x40, 0x40, 0x7C, 0x40, 0x40, 0x40, 0x40], // F'nin piksel temsilci dizisi
+        G: [0x1C, 0x22, 0x40, 0x40, 0x4E, 0x42, 0x22, 0x1C], // G'nin piksel temsilci dizisi
+        H: [0x42, 0x42, 0x42, 0x7E, 0x42, 0x42, 0x42, 0x42], // H'nin piksel temsilci dizisi
+        I: [0x38, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x38], // I'nin piksel temsilci dizisi
+        J: [0x1E, 0x02, 0x02, 0x02, 0x02, 0x02, 0x42, 0x3C], // J'nin piksel temsilci dizisi
+        K: [0x42, 0x44, 0x48, 0x50, 0x70, 0x48, 0x44, 0x42], // K'nin piksel temsilci dizisi
+        L: [0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x7E], // L'nin piksel temsilci dizisi
+        M: [0x42, 0x66, 0x5A, 0x42, 0x42, 0x42, 0x42, 0x42], // M'nin piksel temsilci dizisi
+        N: [0x42, 0x62, 0x52, 0x52, 0x4A, 0x4A, 0x46, 0x42], // N'nin piksel temsilci dizisi
+        O: [0x3C, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3C], // O'nin piksel temsilci dizisi
+        P: [0x7C, 0x42, 0x42, 0x7C, 0x40, 0x40, 0x40, 0x40], // P'nin piksel temsilci dizisi
+        Q: [0x3C, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3C, 0x02], // Q'nin piksel temsilci dizisi
+        R: [0x7C, 0x42, 0x42, 0x7C, 0x50, 0x48, 0x44, 0x42], // R'nin piksel temsilci dizisi
+        S: [0x3C, 0x42, 0x40, 0x20, 0x1C, 0x02, 0x42, 0x3C], // S'nin piksel temsilci dizisi
+        T: [0xFE, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10], // T'nin piksel temsilci dizisi
+        U: [0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3C], // U'nin piksel temsilci dizisi
+        V: [0x42, 0x42, 0x42, 0x24, 0x24, 0x24, 0x18, 0x18], // V'nin piksel temsilci dizisi
+        W: [0x00, 0x82, 0x92, 0x54, 0x54, 0x28, 0x00, 0x00], // W'nin piksel temsilci dizisi
+        X: [0x00, 0x42, 0x24, 0x18, 0x18, 0x24, 0x42, 0x00], // X'nin piksel temsilci dizisi
+        Y: [0x82, 0x44, 0x28, 0x10, 0x10, 0x10, 0x10, 0x10], // Y'nin piksel temsilci dizisi
+        Z: [0x7E, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x7E]  // Z'nin piksel temsilci dizisi
     };
 
-    // Harf temsilcisini ikili forma dönüştürerek döndür
+    
     return letters[letter.toUpperCase()].map(byte => byte.toString(2).padStart(8, '0')).join('\n');
 }
 
@@ -66,32 +88,17 @@ function checkGuess() {
         const guessLetter = guess[i];
         const actualLetter = word[i];
         const pixels = Array.from(letterContainers[i].querySelectorAll(".pixel")); // NodeList'i diziye dönüştür
-        const letterPixels = getLetterPixels(actualLetter); // Harf piksellerini al
+        const actualLetterPixels = getLetterPixels(actualLetter).split('\n'); // Actual letter's pixels
 
-        for (let i = 0; i < 8; i++) {
-            const binaryValue = parseInt(letterPixels[i], 16).toString(2).padStart(8, '0');
-            for (let j = 0; j < 8; j++) {
-                const index = i * 8 + j;
-                const pixel = pixels[index];
-                
-                // Her bir harf için uygun pikseli kontrol et
-                if (binaryValue.charAt(j) === '1') {
-                    pixel.classList.add("letter-pixel");
-                }
+        for (let j = 0; j < pixels.length; j++) {
+            const pixel = pixels[j];
+            const actualPixel = actualLetterPixels[j].charAt(j); // Pixel value of the actual letter
+            pixel.classList.remove("guess", "correct");
+            if (guessLetter === actualLetter && actualPixel === '1') {
+                pixel.classList.add("correct");
             }
-        }
-
-        if (guessLetter === actualLetter) {
-            for (let j = 0; j < pixels.length; j++) {
-                if (pixels[j].classList.contains("letter-pixel")) {
-                    pixels[j].classList.add("correct");
-                }
-            }
-        } else {
-            for (let j = 0; j < pixels.length; j++) {
-                if (pixels[j].classList.contains("letter-pixel")) {
-                    pixels[j].classList.add("guess");
-                }
+            if (actualPixel === '1') {
+                pixel.classList.add("guess");
             }
         }
     }
