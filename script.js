@@ -1,8 +1,41 @@
-const word = "ABCYN";
-let remainingGuesses = 5;
+const word = "HELLO";
+const maxGuesses = 5;
+let remainingGuesses = maxGuesses;
 
 const wordleContainer = document.getElementById("wordle-container");
 const remainingGuessesElement = document.getElementById("remainingGuesses");
+
+// Tahmin alanlarını oluştur
+for (let i = 0; i < maxGuesses; i++) {
+    const guessContainer = document.createElement("div");
+    guessContainer.classList.add("guess-container");
+    
+    // Her bir tahmin alanı için, kelimenin her bir harfi için bir piksel alanı oluştur
+    for (let j = 0; j < word.length; j++) {
+        const letter = word[j];
+        const letterContainer = document.createElement("div");
+        letterContainer.classList.add("letter-container");
+        const pixels = createLetterPixels(getLetterPixels(letter)); // Piksel temsilcilerini al ve kutuları oluştur
+        Array.from(pixels).forEach(pixel => letterContainer.appendChild(pixel));
+        guessContainer.appendChild(letterContainer);
+    }
+    
+    wordleContainer.appendChild(guessContainer);
+}
+
+function createLetterPixels(pixelData) {
+    const pixels = [];
+    const lines = pixelData.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        for (let j = 0; j < line.length; j++) {
+            const pixel = document.createElement("div");
+            pixel.classList.add("pixel");
+            pixels.push(pixel);
+        }
+    }
+    return pixels;
+}
 
 function getLetterPixels(letter) {
     const letters = {
@@ -34,41 +67,21 @@ function getLetterPixels(letter) {
         Z: [0x7E, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x7E]  // Z'nin piksel temsilci dizisi
     };
 
-    
-    return letters[letter.toUpperCase()].map(byte => byte.toString(2).padStart(8, '0')).join('\n');
-}
+    const pixels = letters[letter.toUpperCase()];
 
-// Create wordle grid for each letter
-for (let i = 0; i < word.length; i++) {
-    const letter = word[i];
-    const letterContainer = document.createElement("div");
-    letterContainer.classList.add("letter-container");
-    const pixels = createLetterPixels(getLetterPixels(letter)); // Piksel temsilcilerini al ve kutuları oluştur
-    Array.from(pixels).forEach(pixel => letterContainer.appendChild(pixel));
-    wordleContainer.appendChild(letterContainer);
-}
-
-function createLetterPixels(pixelData) {
-    const pixels = [];
-    const lines = pixelData.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        for (let j = 0; j < line.length; j++) {
-            const pixel = document.createElement("div");
-            pixel.classList.add("pixel");
-            if (line.charAt(j) === '1') {
-                pixel.classList.add("letter-pixel");
-            }
-            pixels.push(pixel);
-        }
+    if (!pixels) {
+        console.error(`No pixel data found for letter: ${letter}`);
+        return null;
     }
-    return pixels;
+    
+    return pixels.map(byte => byte.toString(2).padStart(8, '0')).join('\n');
 }
 
-// Check guess
+// Tahmini kontrol et
 function checkGuess() {
     const guess = document.getElementById("guessInput").value.toUpperCase();
-    const letterContainers = document.querySelectorAll(".letter-container");
+    const guessContainers = document.querySelectorAll(".guess-container");
+    const currentGuessIndex = maxGuesses - remainingGuesses;
 
     if (guess.length !== word.length) {
         alert("Please enter a guess with the correct length.");
@@ -87,24 +100,22 @@ function checkGuess() {
     for (let i = 0; i < guess.length; i++) {
         const guessLetter = guess[i];
         const actualLetter = word[i];
-        const pixels = Array.from(letterContainers[i].querySelectorAll(".pixel")); // NodeList'i diziye dönüştür
+        const pixels = Array.from(guessContainers[i].querySelectorAll(".letter-container"))[currentGuessIndex].querySelectorAll(".pixel"); // NodeList'i diziye dönüştür
+        console.log(pixels);
         const actualLetterPixels = getLetterPixels(actualLetter).split('\n'); // Actual letter's pixels
+        const guessLetterPixels = getLetterPixels(guessLetter).split('\n'); // Guess letter's pixels
 
-        for (let j = 0; j < pixels.length; j++) {
-            const pixel = pixels[j];
-            const actualPixel = actualLetterPixels[j].charAt(j); // Pixel value of the actual letter
-            pixel.classList.remove("guess", "correct");
-            if (guessLetter === actualLetter && actualPixel === '1') {
-                pixel.classList.add("correct");
-            }
-            if (actualPixel === '1') {
-                pixel.classList.add("guess");
+        for (let j = 0; j < actualLetterPixels.length; j++) {
+            const line = actualLetterPixels[j];
+            for (let k = 0; k < line.length; k++) {
+                if (line.charAt(k) === '1' && guessLetterPixels[j].charAt(k) === '1') {
+                    pixels[j * line.length + k].classList.add("correct");
+                }
+                else if (guessLetterPixels[j].charAt(k) === '1') {
+                    pixels[j * line.length + k].classList.add("guess");
+                }
             }
         }
-    }
 
-    if (guess === word) {
-        alert("Congratulations! You guessed the word!");
-        return;
     }
 }
