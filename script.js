@@ -101,20 +101,24 @@ function checkGuess() {
         const guessLetter = guess[i];
         const actualLetter = word[i];
         const pixels = Array.from(guessContainers[i].querySelectorAll(".letter-container"))[currentGuessIndex].querySelectorAll(".pixel"); // NodeList'i diziye dönüştür
-        console.log(pixels);
         const actualLetterPixels = getLetterPixels(actualLetter).split('\n'); // Actual letter's pixels
         const guessLetterPixels = getLetterPixels(guessLetter).split('\n'); // Guess letter's pixels
 
         for (let j = 0; j < actualLetterPixels.length; j++) {
             const line = actualLetterPixels[j];
+            setTimeout(() => {
             for (let k = 0; k < line.length; k++) {
-                if (line.charAt(k) === '1' && guessLetterPixels[j].charAt(k) === '1') {
-                    pixels[j * line.length + k].classList.add("correct");
-                }
-                else if (guessLetterPixels[j].charAt(k) === '1') {
-                    pixels[j * line.length + k].classList.add("guess");
-                }
+                // Her bir pikseli sırayla işleme alarak delay ile boyama işlemi gerçekleştir
+                
+                    if (line.charAt(k) === '1' && guessLetterPixels[j].charAt(k) === '1') {
+                        pixels[j * line.length + k].classList.add("correct");
+                    }
+                    else if (guessLetterPixels[j].charAt(k) === '1') {
+                        pixels[j * line.length + k].classList.add("guess");
+                    }
+                 // Her bir pikselin boyanma zamanını hesapla
             }
+        }, (j * line.length + j) * 15);
         }
 
     }
